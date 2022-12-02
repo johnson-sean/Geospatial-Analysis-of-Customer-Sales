@@ -10,17 +10,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Libraries
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 library(dplyr)
 library(mapview) 
 library(readr)
 library(sf)    
 library(tidygeocoder) 
 library(tigris)
+library(tidyr)
+library(tibble)
+library(stringr)
 ```
 
 # Data
-```{r}
+```{r, message=FALSE}
 travel <- read_csv(here::here("data","travel.csv"))
 #travel
 
@@ -29,7 +32,7 @@ sales_geo <- read_csv(here::here("data","sales_geocoded.csv"))
 ```
 
 # EDA
-```{r}
+```{r, message=FALSE}
 destinations <- travel %>%
     group_by(travelcountry, travellat, travellon) %>%
     summarize(n = n()) %>%
@@ -56,7 +59,7 @@ destinations_sf %>%
 ```
 
 ## Travel
-```{r}
+```{r, message=FALSE}
 travel_connections <- travel %>%
     group_by(homelat, homelon, travellat, travellon) %>%
     summarize(n = n()) %>%
@@ -107,7 +110,7 @@ travel_connection_lines_sf %>%
     )
 ```
 
-```{r}
+```{r, message=FALSE}
 travel_connection_lines_sf %>%
     left_join(
         travel_connections %>% 
@@ -130,7 +133,7 @@ travel_connection_lines_sf %>%
 ```
 
 ## Sales/Customer Analysis
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 sales_geo_sf <- sales_geo %>%
     st_as_sf(
         coords = c("lat", "lon"),
