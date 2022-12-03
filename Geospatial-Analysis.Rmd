@@ -200,7 +200,7 @@ viz.sumSales<-sales_by_county_sf %>%
         zcol       = "sum_purchases",
         color      = "grey",
         map.types  = "CartoDB",
-        layer.name = "Sum Purchases"
+        layer.name = "Sum of Purchases"
     )
 
 viz.sumSales
