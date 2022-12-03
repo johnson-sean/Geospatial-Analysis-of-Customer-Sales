@@ -1,6 +1,6 @@
 ---
 title: "Geospatial-Analysis"
-author: "Sean Cerulean Johnson"
+author: "Sean Johnson"
 date: "2022-03-24"
 output: pdf_document
 ---
@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Libraries
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, include=FALSE}
 library(dplyr)
 library(mapview) 
 library(readr)
@@ -25,10 +25,8 @@ library(stringr)
 # Data
 ```{r, message=FALSE}
 travel <- read_csv(here::here("data","travel.csv"))
-#travel
 
 sales_geo <- read_csv(here::here("data","sales_geocoded.csv"))
-#sales_geo
 ```
 
 # EDA
@@ -38,8 +36,6 @@ destinations <- travel %>%
     summarize(n = n()) %>%
     ungroup() %>%
     arrange(desc(n))
-
-#destinations
 
 destinations_sf <- destinations %>%
     st_as_sf(
@@ -53,8 +49,9 @@ destinations_sf <- destinations %>%
 destinations_sf %>%
     mapview(
         cex           = "n",
-        col.regions   = "#0197F6",
-        alpha.regions = 0.5
+        col.regions   = Thematic::Cer(n=1),
+        alpha.regions = 0.5,
+        legend = FALSE
     )
 ```
 
@@ -91,14 +88,16 @@ travel_connection_multipoints_sf <- travel_connection_sf %>%
 ```
 
 ### Travel Connections
-```{r}
+```{r, warning=FALSE}
 travel_connection_multipoints_sf %>%
   mapview(
-    col.regions   = "#0197F6",
-    alpha.regions = 0.5
+    col.regions   = Thematic::Cer(n=1),
+    alpha.regions = 0.5,
+    legend = FALSE
     )
 ```
 
+####  Connections
 ```{r}
 travel_connection_lines_sf <- travel_connection_multipoints_sf %>%
     st_cast("LINESTRING")
@@ -106,12 +105,15 @@ travel_connection_lines_sf <- travel_connection_multipoints_sf %>%
 travel_connection_lines_sf %>% 
   mapview(
     lwd   = 0.05,
-    color = "#0197F6"
+    color = Thematic::Cer(n=1),
+    legend = FALSE
     )
 ```
 
+
+#### Conections Based on Volume
 ```{r, message=FALSE}
-travel_connection_lines_sf %>%
+viz.connections<-travel_connection_lines_sf %>%
     left_join(
         travel_connections %>% 
           select(rowid, n)
@@ -123,13 +125,15 @@ travel_connection_lines_sf %>%
     ) +
     mapview(
         destinations_sf,
-        col.regions   = "#0197F6",
-        col           = "#0197F6",
+        col.regions   = Thematic::Cer(n=1),
+        col           = Thematic::Cer(n=1),
         cex           = "n",
         alpha.regions = 0.1,
         alpha         = 0.1,
         legend = FALSE
     )
+
+viz.connections
 ```
 
 ## Sales/Customer Analysis
@@ -143,11 +147,15 @@ sales_geo_sf <- sales_geo %>%
 sales_geo_sf %>%
     mapview(
       cex = "purchases",
-      col.regions = "#0197F6")
+      col.regions = Thematic::Cer(n=1),
+      legend = FALSE)
+```
 
+```{r, include=FALSE, warning=FALSE, message=FALSE}
 ca_counties_sf <- tigris::counties(state = "CA") %>%
     st_set_crs(4326)
 ```
+
 
 ```{r}
 ca_counties_sf %>% 
@@ -174,24 +182,28 @@ sales_by_county_sf <- sales_geo_sf %>%
 
 ### Average Sales
 ```{r}
-sales_by_county_sf %>%
+viz.avgSales<-sales_by_county_sf %>%
     mapview(
         zcol       = "avg_purchases",
         color      = "grey",
         map.types  = "CartoDB",
         layer.name = "Average Purchases"
     )
+
+viz.avgSales
 ```
 
 ### Sum of Sales
 ```{r}
-sales_by_county_sf %>%
+viz.sumSales<-sales_by_county_sf %>%
     mapview(
         zcol       = "sum_purchases",
         color      = "grey",
         map.types  = "CartoDB",
         layer.name = "Sum Purchases"
     )
+
+viz.sumSales
 ```
 
 ## Kmeans Cluster Analysis
@@ -204,7 +216,7 @@ kmeans_obj <- sales_geo_sf %>%
 ```
 
 ```{r}
-sales_geo_sf %>%
+viz.salesClusters<-sales_geo_sf %>%
     mutate(cluster = kmeans_obj$cluster %>% factor()) %>%
     mapview(
         zcol       = "cluster",
@@ -213,6 +225,7 @@ sales_geo_sf %>%
         map.types  = "CartoDB",
         layer.name = "Geospatial Segments"
     )
+viz.salesClusters
 ```
 
 
